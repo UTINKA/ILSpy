@@ -52,7 +52,7 @@ namespace ICSharpCode.Decompiler.Documentation
 					b.Append("M:");
 				AppendTypeName(b, member.DeclaringType);
 				b.Append('.');
-				b.Append(member.Name.Replace('.', '#'));
+				b.Append(member.Name.Replace('.', '#').Replace('<', '{').Replace('>', '}'));
 				IList<ParameterDefinition> parameters;
 				TypeReference explicitReturnType = null;
 				if (member is PropertyDefinition) {
@@ -215,7 +215,10 @@ namespace ICSharpCode.Decompiler.Documentation
 				Debug.WriteLine(memberKey);
 				if (memberKey == key)
 					return member;
-				if (shortName == member.Name.Replace('.', '#'))
+				string shortMemberName = member.Name.Replace('.', '#').Replace('<', '{').Replace('>', '}');
+				if (member is IGenericParameterProvider generic && generic.HasGenericParameters)
+					shortMemberName += "``" + generic.GenericParameters.Count;
+				if (shortName == shortMemberName)
 					shortNameMatch = member;
 			}
 			// if there's no match by ID string (key), return the match by name.
