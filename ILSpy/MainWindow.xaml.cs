@@ -256,7 +256,7 @@ namespace ICSharpCode.ILSpy
 					i++;
 				}
 			}
-			LoadAssemblies(args.AssembliesToLoad, commandLineLoadedAssemblies, false);
+			LoadAssemblies(args.AssembliesToLoad, commandLineLoadedAssemblies, focusNode: false);
 			if (args.Language != null)
 				sessionSettings.FilterSettings.Language = Languages.GetLanguage(args.Language);
 			return true;
@@ -706,11 +706,11 @@ namespace ICSharpCode.ILSpy
 						if (selectionDialog.ShowDialog() != true)
 							break;
 						foreach (var entry in selectionDialog.SelectedItems) {
-							var nugetAsm = assemblyList.OpenAssembly("nupkg://" + file + ";" + entry.Name, entry.Stream, true);
+							var nugetAsm = assemblyList.OpenAssembly("nupkg://" + file + ";" + entry.Name, entry.Stream, isAutoLoaded: true);
 							if (nugetAsm != null) {
-								if (loadedAssemblies != null)
+								if (loadedAssemblies != null) {
 									loadedAssemblies.Add(nugetAsm);
-								else {
+								} else {
 									var node = assemblyListTreeNode.FindAssemblyNode(nugetAsm);
 									if (node != null && focusNode) {
 										treeView.SelectedItems.Add(node);
@@ -721,11 +721,12 @@ namespace ICSharpCode.ILSpy
 						}
 						break;
 					default:
-						var asm = assemblyList.OpenAssembly(file);
+						// Do not permanently add assemblies that are loaded from command-line.
+						var asm = assemblyList.OpenAssembly(file, isAutoLoaded: loadedAssemblies != null);
 						if (asm != null) {
-							if (loadedAssemblies != null)
+							if (loadedAssemblies != null) {
 								loadedAssemblies.Add(asm);
-							else {
+							} else {
 								var node = assemblyListTreeNode.FindAssemblyNode(asm);
 								if (node != null && focusNode) {
 									treeView.SelectedItems.Add(node);
